@@ -5,3 +5,6 @@ gspread
 oauth2client
 dash-bootstrap-components  # For nicer UI styling (optional)
 gunicorn                   # If you plan to deploy (e.g. on Heroku or Render)
+google-auth
+streamlit-option-menu  # if you want sidebar menus
+streamlit-aggrid       # for interactive tables
