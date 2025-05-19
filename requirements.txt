@@ -1,0 +1,7 @@
+dash
+pandas
+plotly
+gspread
+oauth2client
+dash-bootstrap-components  # For nicer UI styling (optional)
+gunicorn                   # If you plan to deploy (e.g. on Heroku or Render)
