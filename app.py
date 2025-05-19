@@ -1,23 +1,20 @@
+import streamlit as st
 import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
-import streamlit as st
 
 def load_data():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     
-    # Load credentials from Streamlit secrets
-    creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS_JSON"])
+    creds_dict = st.secrets["gcp_service_account"]  # Use the section name directly
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     client = gspread.authorize(creds)
 
-    # Load sheet
     sheet = client.open_by_key("1XDWbJTfucsUvKq8PXVVQ2oap4reTYp10tPHe49Xejmw")
     worksheet = sheet.get_worksheet(0)
-    data = worksheet.get_all_values()[1:]  # Skip row 1 (header row)
-    headers = worksheet.row_values(2)      # Use row 2 as actual headers
-
+    data = worksheet.get_all_values()[1:]
+    headers = worksheet.row_values(2)
     df = pd.DataFrame(data, columns=headers)
     return df
 
