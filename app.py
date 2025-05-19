@@ -1,26 +1,30 @@
-# === app.py ===
-import dash
-from dash import dcc, html, Input, Output
-import pandas as pd
-import plotly.express as px
+import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import pandas as pd
+import streamlit as st
 
-# === Load Data from Google Sheets ===
 def load_data():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+    
+    # Load credentials from Streamlit secrets
+    creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS_JSON"])
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     client = gspread.authorize(creds)
 
+    # Load sheet
     sheet = client.open_by_key("1XDWbJTfucsUvKq8PXVVQ2oap4reTYp10tPHe49Xejmw")
     worksheet = sheet.get_worksheet(0)
-    data = worksheet.get_all_values()[1:]  # Skip row 1 (first header row)
-    headers = worksheet.row_values(2)      # Use row 2 as headers
+    data = worksheet.get_all_values()[1:]  # Skip row 1 (header row)
+    headers = worksheet.row_values(2)      # Use row 2 as actual headers
 
     df = pd.DataFrame(data, columns=headers)
+    return df
+
 
     # Drop unwanted columns
-    drop_cols = ['N', 'O', 'P', 'R', 'S', 'W', 'AJ'] + [chr(c) for c in range(ord('AL'), ord('AT'))]
+    drop_cols = ['N', 'O', 'P', 'R', 'S', 'W', 'AJ'] + \
+            [col for col in ['AL', 'AM', 'AN', 'AP', 'AQ', 'AR', 'AS','AT','AU']]
     drop_by_index = [ord(c) - ord('A') for c in drop_cols if c >= 'A' and c <= 'Z']
     df.drop(df.columns[drop_by_index], axis=1, inplace=True, errors='ignore')
 
