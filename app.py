@@ -1,23 +1,26 @@
 import streamlit as st
-import json
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
+from google.oauth2.service_account import Credentials
 
 def load_data():
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    
+    scope = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+
     creds_dict = st.secrets["gcp_service_account"]
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
     client = gspread.authorize(creds)
 
+    # Load sheet
     sheet = client.open_by_key("1XDWbJTfucsUvKq8PXVVQ2oap4reTYp10tPHe49Xejmw")
     worksheet = sheet.get_worksheet(0)
-    data = worksheet.get_all_values()[1:]
-    headers = worksheet.row_values(2)
+    data = worksheet.get_all_values()[1:]  # Skip Row 1
+    headers = worksheet.row_values(2)      # Use Row 2 as headers
+
     df = pd.DataFrame(data, columns=headers)
     return df
-
 
     # Drop unwanted columns
     drop_cols = ['N', 'O', 'P', 'R', 'S', 'W', 'AJ'] + \
