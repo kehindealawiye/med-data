@@ -25,7 +25,7 @@ def load_data():
     df.columns = df.columns.str.strip().str.upper()
     return df
 
-Load and clean data
+# === Load Data and clean data
 
 df = load_data() df.replace('', pd.NA, inplace=True) df = df.dropna(how='all')
 
