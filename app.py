@@ -29,6 +29,12 @@ def load_data():
     df.columns = df.columns.map(str).str.strip().str.upper()
     return df
 
+# === CLEAN CURRENCY FIELDS ===
+def clean_currency(val):
+    if isinstance(val, str):
+        return val.replace("₦", "").replace(",", "").replace("\xa0", "").strip()
+    return val
+
 # === LOAD & CLEAN DATA ===
 df = load_data()
 if df.empty:
@@ -50,9 +56,10 @@ for col in df.columns:
         if key in col:
             column_map[key] = col
 
-# === CONVERT NUMERIC COLUMNS ===
+# === CLEAN & CONVERT KPI COLUMNS ===
 for col in column_map.values():
     if col and col in df.columns:
+        df[col] = df[col].apply(clean_currency)
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
 # === PAGE CONFIG ===
@@ -95,12 +102,24 @@ if 'All' not in mda and mda:
     filtered_df = filtered_df[filtered_df['MDA'].isin(mda)]
 
 # === KPI CALCULATIONS ===
-kpi1 = filtered_df[column_map["TOTAL CONTRACT SUM EDITED"]].sum() if column_map["TOTAL CONTRACT SUM EDITED"] else 0
-kpi2 = filtered_df[column_map["ADVANCE PAYMENT"]].sum() if column_map["ADVANCE PAYMENT"] else 0
-kpi3 = filtered_df[column_map["PREVIOUS PAYMENT"]].sum() if column_map["PREVIOUS PAYMENT"] else 0
-kpi4 = filtered_df[column_map["AMOUNT NOW DUE"]].sum() if column_map["AMOUNT NOW DUE"] else 0
+def safe_sum(df, col_key):
+    col = column_map.get(col_key)
+    if col and col in df.columns:
+        return pd.to_numeric(df[col], errors="coerce").sum()
+    return 0
+
+def safe_avg(df, col_key):
+    col = column_map.get(col_key)
+    if col and col in df.columns:
+        return pd.to_numeric(df[col], errors="coerce").mean()
+    return 0
+
+kpi1 = safe_sum(filtered_df, "TOTAL CONTRACT SUM EDITED")
+kpi2 = safe_sum(filtered_df, "ADVANCE PAYMENT")
+kpi3 = safe_sum(filtered_df, "PREVIOUS PAYMENT")
+kpi4 = safe_sum(filtered_df, "AMOUNT NOW DUE")
 kpi5 = filtered_df['DATE OF APPROVAL'].notna().sum() if 'DATE OF APPROVAL' in filtered_df else 0
-kpi6 = filtered_df[column_map["CONTRACTOR JOB RATING"]].mean() if column_map["CONTRACTOR JOB RATING"] else 0
+kpi6 = safe_avg(filtered_df, "CONTRACTOR JOB RATING")
 
 # === KPI CARDS ===
 col1, col2, col3 = st.columns(3)
@@ -119,7 +138,7 @@ with col5:
 with col6:
     st.metric("AVG CONTRACTOR JOB RATING", f"{kpi6:.1f} / 5")
 
-# === CHART VISUALIZATIONS ===
+# === CHARTS & TABLES ===
 if not filtered_df.empty:
     if 'SECTOR' in filtered_df.columns:
         sector_counts = filtered_df['SECTOR'].value_counts().reset_index()
