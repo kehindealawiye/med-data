@@ -37,17 +37,22 @@ if df.empty:
 df.replace('', pd.NA, inplace=True)
 df = df.dropna(how='all')
 
+# === DYNAMIC KPI COLUMN MATCHING ===
+column_map = {
+    "TOTAL CONTRACT SUM EDITED": None,
+    "ADVANCE PAYMENT": None,
+    "PREVIOUS PAYMENT": None,
+    "AMOUNT NOW DUE": None,
+    "CONTRACTOR JOB RATING": None,
+}
+for col in df.columns:
+    for key in column_map.keys():
+        if key in col:
+            column_map[key] = col
+
 # === CONVERT NUMERIC COLUMNS ===
-rating_col = 'CONTRACTOR JOB RATING \n(VERY GOOD (5), GOOD (4), AVERAGE (3), POOR (2), VERY POOR (1)'
-numeric_columns = [
-    'TOTAL CONTRACT SUM EDITED',
-    'ADVANCE PAYMENT',
-    'PREVIOUS PAYMENT',
-    'AMOUNT NOW DUE',
-    rating_col
-]
-for col in numeric_columns:
-    if col in df.columns:
+for col in column_map.values():
+    if col and col in df.columns:
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
 # === PAGE CONFIG ===
@@ -90,12 +95,12 @@ if 'All' not in mda and mda:
     filtered_df = filtered_df[filtered_df['MDA'].isin(mda)]
 
 # === KPI CALCULATIONS ===
-kpi1 = filtered_df['TOTAL CONTRACT SUM EDITED'].sum()
-kpi2 = filtered_df['ADVANCE PAYMENT'].sum()
-kpi3 = filtered_df['PREVIOUS PAYMENT'].sum()
-kpi4 = filtered_df['AMOUNT NOW DUE'].sum()
-kpi5 = filtered_df['DATE OF APPROVAL'].notna().sum()
-kpi6 = filtered_df[rating_col].mean() if rating_col in filtered_df else 0
+kpi1 = filtered_df[column_map["TOTAL CONTRACT SUM EDITED"]].sum() if column_map["TOTAL CONTRACT SUM EDITED"] else 0
+kpi2 = filtered_df[column_map["ADVANCE PAYMENT"]].sum() if column_map["ADVANCE PAYMENT"] else 0
+kpi3 = filtered_df[column_map["PREVIOUS PAYMENT"]].sum() if column_map["PREVIOUS PAYMENT"] else 0
+kpi4 = filtered_df[column_map["AMOUNT NOW DUE"]].sum() if column_map["AMOUNT NOW DUE"] else 0
+kpi5 = filtered_df['DATE OF APPROVAL'].notna().sum() if 'DATE OF APPROVAL' in filtered_df else 0
+kpi6 = filtered_df[column_map["CONTRACTOR JOB RATING"]].mean() if column_map["CONTRACTOR JOB RATING"] else 0
 
 # === KPI CARDS ===
 col1, col2, col3 = st.columns(3)
@@ -131,9 +136,8 @@ if not filtered_df.empty:
         st.subheader("Summary Table by MDA and Year")
         st.dataframe(summary_table)
 
-    # === SUMMARY TABLES ===
     st.subheader("Table: Sector Head, MDA, Project Title, Contractor, Amount Now Due")
-    cols1 = ['SECTOR HEAD', 'MDA', 'PROJECT TITLE', 'CONTRACTOR', 'AMOUNT NOW DUE']
+    cols1 = ['SECTOR HEAD', 'MDA', 'PROJECT TITLE', 'CONTRACTOR', column_map["AMOUNT NOW DUE"]]
     if all(c in filtered_df.columns for c in cols1):
         st.dataframe(filtered_df[cols1])
 
@@ -141,7 +145,7 @@ if not filtered_df.empty:
     if 'COFOG' in filtered_df.columns and 'PROJECT TITLE' in filtered_df.columns:
         cofog_table = filtered_df.groupby(filtered_df['COFOG'].astype(str).str.strip()).agg({
             'PROJECT TITLE': 'count',
-            'AMOUNT NOW DUE': 'sum'
+            column_map["AMOUNT NOW DUE"]: 'sum'
         }).reset_index().rename(columns={'PROJECT TITLE': 'NO. OF PROJECTS'})
         st.dataframe(cofog_table)
 
@@ -149,7 +153,7 @@ if not filtered_df.empty:
     if 'THEMES PILLAR' in filtered_df.columns and 'PROJECT TITLE' in filtered_df.columns:
         theme_table = filtered_df.groupby(filtered_df['THEMES PILLAR'].astype(str).str.strip()).agg({
             'PROJECT TITLE': 'count',
-            'AMOUNT NOW DUE': 'sum'
+            column_map["AMOUNT NOW DUE"]: 'sum'
         }).reset_index().rename(columns={'PROJECT TITLE': 'NO. OF PROJECTS'})
         st.dataframe(theme_table)
 else:
