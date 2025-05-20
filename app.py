@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px 
 from google.oauth2.service_account import Credentials
 
-=== Load Data from Google Sheets ===
+# === Load Data from Google Sheets ===
 
 def load_data(): scope = [ "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive" ] creds_dict = st.secrets["gcp_service_account"] creds = Credentials.from_service_account_info(creds_dict, scopes=scope) client = gspread.authorize(creds)
 
@@ -17,7 +17,7 @@ df = pd.DataFrame(data, columns=headers)
 df.columns = df.columns.str.strip().str.upper()
 return df
 
-=== Load and clean data ===
+# === Load and clean data ===
 
 df = load_data() df.replace('', pd.NA, inplace=True) df = df.dropna(how='all')
 
