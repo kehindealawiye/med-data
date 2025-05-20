@@ -16,8 +16,10 @@ def load_data():
 
     sheet = client.open_by_key("1XDWbJTfucsUvKq8PXVVQ2oap4reTYp10tPHe49Xejmw")
     worksheet = sheet.get_worksheet(0)
-    headers = worksheet.row_values(1)         # Use row 1 as headers
-    data = worksheet.get_all_values()[1:]     # Skip row 1 (header row)
+
+    raw = worksheet.get_all_values()
+    headers = raw[0]
+    data = raw[1:]
 
     df = pd.DataFrame(data, columns=headers)
     df.columns = df.columns.str.strip().str.upper()
