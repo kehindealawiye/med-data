@@ -6,7 +6,10 @@ from google.oauth2.service_account import Credentials
 
 # === Load Data from Google Sheets ===
 
-def load_data(): scope = [ "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive" ] creds_dict = st.secrets["gcp_service_account"] creds = Credentials.from_service_account_info(creds_dict, scopes=scope) client = gspread.authorize(creds)
+def load_data(): scope = [ "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive" ] 
+    creds_dict = st.secrets["gcp_service_account"] 
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scope) 
+    client = gspread.authorize(creds)
 
 sheet = client.open_by_key("1XDWbJTfucsUvKq8PXVVQ2oap4reTYp10tPHe49Xejmw")
 worksheet = sheet.get_worksheet(0)
