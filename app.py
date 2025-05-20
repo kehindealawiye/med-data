@@ -16,15 +16,15 @@ def load_data():
     client = gspread.authorize(creds)
 
     sheet = client.open_by_key("1XDWbJTfucsUvKq8PXVVQ2oap4reTYp10tPHe49Xejmw")
-    worksheet = sheet.get_worksheet(0)
+    worksheet = sheet.worksheet("REGISTER")
 
     raw = worksheet.get_all_values()
-    if len(raw) < 2:
-        st.error("The Google Sheet doesn't contain enough rows.")
+    if len(raw) < 3:
+        st.error("The REGISTER sheet does not contain enough rows.")
         return pd.DataFrame()
 
-    headers = raw[1]
-    data = raw[2:]
+    headers = raw[1]  # Row 2 (index 1)
+    data = raw[2:]    # Data starts on Row 3 (index 2)
     df = pd.DataFrame(data, columns=headers)
     df.columns = df.columns.str.strip().str.upper()
     return df
@@ -65,7 +65,6 @@ cofog = st.selectbox("Filter by COFOG", get_unique_with_all('COFOG'))
 theme = st.selectbox("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'))
 payment_stage = st.selectbox("Filter by Payment Stage", get_unique_with_all('PAYMENT STAGE'))
 
-# Filter MDA options based on COFOG + Theme
 filtered_for_mda = df.copy()
 if cofog != 'All':
     filtered_for_mda = filtered_for_mda[filtered_for_mda['COFOG'].str.strip() == cofog]
