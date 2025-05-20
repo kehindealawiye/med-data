@@ -23,8 +23,8 @@ def load_data():
         st.error("The REGISTER sheet does not contain enough rows.")
         return pd.DataFrame()
 
-    headers = raw[1]  # Row 2 (index 1)
-    data = raw[2:]    # Data starts on Row 3 (index 2)
+    headers = raw[1]
+    data = raw[2:]
     df = pd.DataFrame(data, columns=headers)
     df.columns = df.columns.map(str).str.strip().str.upper()
     return df
@@ -72,6 +72,23 @@ def get_unique_with_all(column):
     return ['All'] + sorted(values)
 
 year = st.selectbox("Filter by Year", get_unique_with_all('YEAR'))
+
+# === MONTH FILTER BASED ON YEAR ===
+month_col = 'MONTH'
+month_values = []
+
+if month_col in df.columns:
+    df[month_col] = df[month_col].astype(str).str.strip()
+
+    if year != 'All' and 'YEAR' in df.columns:
+        year_filtered = df[df['YEAR'].astype(str).str.strip() == year]
+        month_values = year_filtered[month_col].dropna().unique().tolist()
+    else:
+        month_values = df[month_col].dropna().unique().tolist()
+
+month_options = ['All'] + sorted(month_values)
+month = st.selectbox("Filter by Month", month_options)
+
 lga = st.selectbox("Filter by LGA", get_unique_with_all('LGA'))
 cofog = st.selectbox("Filter by COFOG", get_unique_with_all('COFOG'))
 theme = st.selectbox("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'))
@@ -90,6 +107,8 @@ mda = st.multiselect("Filter by MDA", mda_options, default=['All'])
 filtered_df = df.copy()
 if year != 'All':
     filtered_df = filtered_df[filtered_df['YEAR'].astype(str).str.strip() == year]
+if month != 'All' and month_col in filtered_df.columns:
+    filtered_df = filtered_df[filtered_df[month_col].astype(str).str.strip() == month]
 if lga != 'All':
     filtered_df = filtered_df[filtered_df['LGA'].astype(str).str.strip() == lga]
 if cofog != 'All':
