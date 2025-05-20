@@ -1,7 +1,7 @@
-import streamlit as st 
-import gspread 
-import pandas as pd 
-import plotly.express as px 
+import streamlit as st
+import gspread
+import pandas as pd
+import plotly.express as px
 from google.oauth2.service_account import Credentials
 
 # === Load Data from Google Sheets ===
@@ -55,45 +55,48 @@ selected_year = st.multiselect("Filter by Year", year_options)
 
 # === Apply filters ===
 filtered_df = df.copy()
-if selected_sector:
+if selected_sector and 'SECTOR' in filtered_df.columns:
     filtered_df = filtered_df[filtered_df['SECTOR'].isin(selected_sector)]
-if selected_mda:
+if selected_mda and 'MDA' in filtered_df.columns:
     filtered_df = filtered_df[filtered_df['MDA'].isin(selected_mda)]
-if selected_year:
+if selected_year and 'YEAR' in filtered_df.columns:
     filtered_df = filtered_df[filtered_df['YEAR'].isin(selected_year)]
 
 # === Charts ===
 if not filtered_df.empty:
-    # Bar Chart
-    sector_counts = filtered_df['SECTOR'].value_counts().reset_index()
-    sector_counts.columns = ['Sector', 'Count']
+    # Bar Chart (Projects by Sector)
+    if 'SECTOR' in filtered_df.columns:
+        sector_counts = filtered_df['SECTOR'].value_counts().reset_index()
+        sector_counts.columns = ['Sector', 'Count']
 
-    bar_chart = px.bar(
-        sector_counts,
-        x='Sector',
-        y='Count',
-        labels={'Sector': 'Sector', 'Count': 'Project Count'},
-        title="Projects by Sector"
-    )
-    st.plotly_chart(bar_chart, use_container_width=True)
+        bar_chart = px.bar(
+            sector_counts,
+            x='Sector',
+            y='Count',
+            labels={'Sector': 'Sector', 'Count': 'Project Count'},
+            title="Projects by Sector"
+        )
+        st.plotly_chart(bar_chart, use_container_width=True)
 
-    # Donut Chart
-    mda_counts = filtered_df['MDA'].value_counts().reset_index()
-    mda_counts.columns = ['MDA', 'Count']
+    # Donut Chart (Distribution by MDA)
+    if 'MDA' in filtered_df.columns:
+        mda_counts = filtered_df['MDA'].value_counts().reset_index()
+        mda_counts.columns = ['MDA', 'Count']
 
-    donut_chart = px.pie(
-        mda_counts,
-        names='MDA',
-        values='Count',
-        title="Distribution by MDA",
-        hole=0.4
-    )
-    st.plotly_chart(donut_chart, use_container_width=True)
+        donut_chart = px.pie(
+            mda_counts,
+            names='MDA',
+            values='Count',
+            title="Distribution by MDA",
+            hole=0.4
+        )
+        st.plotly_chart(donut_chart, use_container_width=True)
 
     # === Table ===
-    table_df = filtered_df.groupby(['YEAR', 'MDA']).size().reset_index(name='Project Count')
-    st.subheader("Summary Table by MDA and Year")
-    st.dataframe(table_df)
+    if 'YEAR' in filtered_df.columns and 'MDA' in filtered_df.columns:
+        table_df = filtered_df.groupby(['YEAR', 'MDA']).size().reset_index(name='Project Count')
+        st.subheader("Summary Table by MDA and Year")
+        st.dataframe(table_df)
 
 else:
     st.info("No data matches the selected filters.")
