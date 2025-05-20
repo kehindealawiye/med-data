@@ -1,6 +1,8 @@
 import streamlit as st
 import gspread
 import pandas as pd
+import dash
+from dash import html, dcc, Input, Output
 from google.oauth2.service_account import Credentials
 
 def load_data():
