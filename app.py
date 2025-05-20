@@ -7,16 +7,23 @@ import streamlit as st
 
 # === Load Data from Google Sheets ===
 
-def load_data(): scope = [ "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive" ] creds_dict = st.secrets["gcp_service_account"] creds = Credentials.from_service_account_info(creds_dict, scopes=scope) client = gspread.authorize(creds)
+def load_data():
+    scope = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+    creds_dict = st.secrets["gcp_service_account"]
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
+    client = gspread.authorize(creds)
 
-sheet = client.open_by_key("1XDWbJTfucsUvKq8PXVVQ2oap4reTYp10tPHe49Xejmw")
-worksheet = sheet.get_worksheet(0)
-data = worksheet.get_all_values()[1:]  # Skip row 1 (first header row)
-headers = worksheet.row_values(2)      # Use row 2 as headers
+    sheet = client.open_by_key("1XDWbJTfucsUvKq8PXVVQ2oap4reTYp10tPHe49Xejmw")
+    worksheet = sheet.get_worksheet(0)
+    data = worksheet.get_all_values()[1:]  # Skip row 1 (first header row)
+    headers = worksheet.row_values(2)      # Use row 2 as headers
 
-df = pd.DataFrame(data, columns=headers)
-df.columns = df.columns.str.strip().str.upper()
-return df
+    df = pd.DataFrame(data, columns=headers)
+    df.columns = df.columns.str.strip().str.upper()
+    return df
 
 Load and clean data
 
