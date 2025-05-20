@@ -84,9 +84,9 @@ cofog_options = df['COFOG'].dropna().unique() if 'COFOG' in df.columns else []
 themes_options = df['THEMES PILLAR'].dropna().unique() if 'THEMES PILLAR' in df.columns else []
 year_options = df['YEAR'].dropna().unique() if 'YEAR' in df.columns else []
 
+selected_year = st.multiselect("Filter by Year", year_options)
 selected_cofog = st.selectbox("Filter by COFOG", cofog_options) if cofog_options.size > 0 else None
 selected_theme = st.selectbox("Filter by THEMES PILLAR", themes_options) if themes_options.size > 0 else None
-selected_year = st.multiselect("Filter by Year", year_options)
 
 # Narrow MDA list based on COFOG and THEMES PILLAR
 filtered_for_mda = df.copy()
