@@ -167,9 +167,9 @@ with col6:
 # === CHARTS & TABLES ===
 if not filtered_df.empty:
     if 'SECTOR' in filtered_df.columns:
-        sector_counts = filtered_df['SECTOR'].value_counts().reset_index()
-        sector_counts.columns = ['Sector', 'Count']
-        st.plotly_chart(px.bar(sector_counts, x='Sector', y='Count', title="Projects by Sector"), use_container_width=True)
+        sector_counts = filtered_df['COFOG'].value_counts().reset_index()
+        sector_counts.columns = ['COFOG', 'Count']
+        st.plotly_chart(px.bar(sector_counts, x='COFOG', y='Count', title="Projects by Sector"), use_container_width=True)
 
     if 'MDA' in filtered_df.columns:
         mda_counts = filtered_df['MDA'].value_counts().reset_index()
