@@ -64,7 +64,7 @@ for col in column_map.values():
 
 # === PAGE CONFIG ===
 st.set_page_config(page_title="Programme Performance Dashboard", layout="wide")
-st.title("📊🧾 Programme Performance Dashboard")
+st.title("📊🧾 MED Certification Approvals Dashboard")
 
 # === FILTERS ===
 def get_unique_with_all(column):
