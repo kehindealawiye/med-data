@@ -16,8 +16,8 @@ def load_data():
 
     sheet = client.open_by_key("1XDWbJTfucsUvKq8PXVVQ2oap4reTYp10tPHe49Xejmw")
     worksheet = sheet.get_worksheet(0)
-    headers = worksheet.row_values(1)      # Row 1 is the actual header
-    data = worksheet.get_all_values()[1:]  # Skip row 1 (header row)
+    headers = worksheet.row_values(1)         # Use row 1 as headers
+    data = worksheet.get_all_values()[1:]     # Skip row 1 (header row)
 
     df = pd.DataFrame(data, columns=headers)
     df.columns = df.columns.str.strip().str.upper()
@@ -62,19 +62,27 @@ if selected_year:
 
 # === Charts ===
 if not filtered_df.empty:
+    # Bar Chart
+    sector_counts = filtered_df['SECTOR'].value_counts().reset_index()
+    sector_counts.columns = ['Sector', 'Count']
+
     bar_chart = px.bar(
-        filtered_df['SECTOR'].value_counts().reset_index(),
-        x='index',
-        y='SECTOR',
-        labels={'index': 'Sector', 'SECTOR': 'Project Count'},
+        sector_counts,
+        x='Sector',
+        y='Count',
+        labels={'Sector': 'Sector', 'Count': 'Project Count'},
         title="Projects by Sector"
     )
     st.plotly_chart(bar_chart, use_container_width=True)
 
+    # Donut Chart
+    mda_counts = filtered_df['MDA'].value_counts().reset_index()
+    mda_counts.columns = ['MDA', 'Count']
+
     donut_chart = px.pie(
-        filtered_df['MDA'].value_counts().reset_index(),
-        names='index',
-        values='MDA',
+        mda_counts,
+        names='MDA',
+        values='Count',
         title="Distribution by MDA",
         hole=0.4
     )
@@ -84,5 +92,6 @@ if not filtered_df.empty:
     table_df = filtered_df.groupby(['YEAR', 'MDA']).size().reset_index(name='Project Count')
     st.subheader("Summary Table by MDA and Year")
     st.dataframe(table_df)
+
 else:
     st.info("No data matches the selected filters.")
