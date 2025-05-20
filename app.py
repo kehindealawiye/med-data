@@ -26,7 +26,7 @@ def load_data():
     headers = raw[1]  # Row 2 (index 1)
     data = raw[2:]    # Data starts on Row 3 (index 2)
     df = pd.DataFrame(data, columns=headers)
-    df.columns = df.columns.str.strip().str.upper()
+    df.columns = df.columns.map(str).str.strip().str.upper()
     return df
 
 # === LOAD & CLEAN DATA ===
@@ -56,7 +56,7 @@ st.title("Programme Performance Dashboard")
 
 # === FILTERS ===
 def get_unique_with_all(column):
-    values = df[column].dropna().str.strip().unique().tolist() if column in df.columns else []
+    values = df[column].dropna().astype(str).str.strip().unique().tolist() if column in df.columns else []
     return ['All'] + sorted(values)
 
 year = st.selectbox("Filter by Year", get_unique_with_all('YEAR'))
@@ -67,9 +67,9 @@ payment_stage = st.selectbox("Filter by Payment Stage", get_unique_with_all('PAY
 
 filtered_for_mda = df.copy()
 if cofog != 'All':
-    filtered_for_mda = filtered_for_mda[filtered_for_mda['COFOG'].str.strip() == cofog]
+    filtered_for_mda = filtered_for_mda[filtered_for_mda['COFOG'].astype(str).str.strip() == cofog]
 if theme != 'All':
-    filtered_for_mda = filtered_for_mda[filtered_for_mda['THEMES PILLAR'].str.strip() == theme]
+    filtered_for_mda = filtered_for_mda[filtered_for_mda['THEMES PILLAR'].astype(str).str.strip() == theme]
 
 mda_options = get_unique_with_all('MDA')
 mda = st.multiselect("Filter by MDA", mda_options, default=['All'])
@@ -77,24 +77,24 @@ mda = st.multiselect("Filter by MDA", mda_options, default=['All'])
 # === APPLY FILTERS ===
 filtered_df = df.copy()
 if year != 'All':
-    filtered_df = filtered_df[filtered_df['YEAR'].str.strip() == year]
+    filtered_df = filtered_df[filtered_df['YEAR'].astype(str).str.strip() == year]
 if lga != 'All':
-    filtered_df = filtered_df[filtered_df['LGA'].str.strip() == lga]
+    filtered_df = filtered_df[filtered_df['LGA'].astype(str).str.strip() == lga]
 if cofog != 'All':
-    filtered_df = filtered_df[filtered_df['COFOG'].str.strip() == cofog]
+    filtered_df = filtered_df[filtered_df['COFOG'].astype(str).str.strip() == cofog]
 if theme != 'All':
-    filtered_df = filtered_df[filtered_df['THEMES PILLAR'].str.strip() == theme]
+    filtered_df = filtered_df[filtered_df['THEMES PILLAR'].astype(str).str.strip() == theme]
 if payment_stage != 'All':
-    filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].str.strip() == payment_stage]
+    filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip() == payment_stage]
 if 'All' not in mda and mda:
     filtered_df = filtered_df[filtered_df['MDA'].isin(mda)]
 
 # === KPI CALCULATIONS ===
-kpi1 = filtered_df['TOTAL CONTRACT SUM EDITED'].sum() if 'TOTAL CONTRACT SUM EDITED' in filtered_df else 0
-kpi2 = filtered_df['ADVANCE PAYMENT'].sum() if 'ADVANCE PAYMENT' in filtered_df else 0
-kpi3 = filtered_df['PREVIOUS PAYMENT'].sum() if 'PREVIOUS PAYMENT' in filtered_df else 0
-kpi4 = filtered_df['AMOUNT NOW DUE'].sum() if 'AMOUNT NOW DUE' in filtered_df else 0
-kpi5 = filtered_df['DATE OF APPROVAL'].notna().sum() if 'DATE OF APPROVAL' in filtered_df else 0
+kpi1 = filtered_df['TOTAL CONTRACT SUM EDITED'].sum()
+kpi2 = filtered_df['ADVANCE PAYMENT'].sum()
+kpi3 = filtered_df['PREVIOUS PAYMENT'].sum()
+kpi4 = filtered_df['AMOUNT NOW DUE'].sum()
+kpi5 = filtered_df['DATE OF APPROVAL'].notna().sum()
 kpi6 = filtered_df[rating_col].mean() if rating_col in filtered_df else 0
 
 # === KPI CARDS ===
@@ -139,7 +139,7 @@ if not filtered_df.empty:
 
     st.subheader("Table: COFOG – No. of Projects and Amount Now Due")
     if 'COFOG' in filtered_df.columns and 'PROJECT TITLE' in filtered_df.columns:
-        cofog_table = filtered_df.groupby(filtered_df['COFOG'].str.strip()).agg({
+        cofog_table = filtered_df.groupby(filtered_df['COFOG'].astype(str).str.strip()).agg({
             'PROJECT TITLE': 'count',
             'AMOUNT NOW DUE': 'sum'
         }).reset_index().rename(columns={'PROJECT TITLE': 'NO. OF PROJECTS'})
@@ -147,7 +147,7 @@ if not filtered_df.empty:
 
     st.subheader("Table: THEMES PILLAR – No. of Projects and Amount Now Due")
     if 'THEMES PILLAR' in filtered_df.columns and 'PROJECT TITLE' in filtered_df.columns:
-        theme_table = filtered_df.groupby(filtered_df['THEMES PILLAR'].str.strip()).agg({
+        theme_table = filtered_df.groupby(filtered_df['THEMES PILLAR'].astype(str).str.strip()).agg({
             'PROJECT TITLE': 'count',
             'AMOUNT NOW DUE': 'sum'
         }).reset_index().rename(columns={'PROJECT TITLE': 'NO. OF PROJECTS'})
