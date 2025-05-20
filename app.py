@@ -1,4 +1,8 @@
-import streamlit as st import gspread import pandas as pd import plotly.express as px from google.oauth2.service_account import Credentials
+import streamlit as st 
+import gspread 
+import pandas as pd 
+import plotly.express as px 
+from google.oauth2.service_account import Credentials
 
 === Load Data from Google Sheets ===
 
