@@ -1,4 +1,9 @@
-import dash from dash import dcc, html, Input, Output import gspread import pandas as pd from google.oauth2.service_account import Credentials
+import dash
+from dash import dcc, html, Input, Output
+import gspread
+import pandas as pd
+from google.oauth2.service_account import Credentials
+import streamlit as st
 
 === Load Data from Google Sheets ===
 
