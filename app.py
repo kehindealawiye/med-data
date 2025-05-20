@@ -5,7 +5,6 @@ import plotly.express as px
 from google.oauth2.service_account import Credentials
 
 # === Load Data from Google Sheets ===
-
 def load_data():
     scope = [
         "https://www.googleapis.com/auth/spreadsheets",
@@ -14,19 +13,17 @@ def load_data():
     creds_dict = st.secrets["gcp_service_account"]
     creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
     client = gspread.authorize(creds)
-    return client
 
-sheet = client.open_by_key("1XDWbJTfucsUvKq8PXVVQ2oap4reTYp10tPHe49Xejmw")
-worksheet = sheet.get_worksheet(0)
-data = worksheet.get_all_values()[1:]  # Skip row 1
-headers = worksheet.row_values(2)      # Use row 2 as headers
+    sheet = client.open_by_key("1XDWbJTfucsUvKq8PXVVQ2oap4reTYp10tPHe49Xejmw")
+    worksheet = sheet.get_worksheet(0)
+    data = worksheet.get_all_values()[1:]  # Skip row 1
+    headers = worksheet.row_values(2)      # Use row 2 as headers
 
-df = pd.DataFrame(data, columns=headers)
-df.columns = df.columns.str.strip().str.upper()
-return df
+    df = pd.DataFrame(data, columns=headers)
+    df.columns = df.columns.str.strip().str.upper()
+    return df
 
 # === Load and clean data ===
-
 df = load_data()
 df.replace('', pd.NA, inplace=True)
 df = df.dropna(how='all')
@@ -42,11 +39,7 @@ st.set_page_config(page_title="Programme Performance Dashboard", layout="wide")
 st.title("Programme Performance Dashboard")
 
 # === KPI Card ===
-if 'TOTAL CONTRACT SUM EDITED' in df.columns:
-    total_contract_sum = df['TOTAL CONTRACT SUM EDITED'].sum()
-else:
-    total_contract_sum = 0
-
+total_contract_sum = df['TOTAL CONTRACT SUM EDITED'].sum() if 'TOTAL CONTRACT SUM EDITED' in df.columns else 0
 st.metric("Total Contract Sum", f"₦{total_contract_sum:,.0f}")
 
 # === Filters ===
@@ -60,7 +53,6 @@ selected_year = st.multiselect("Filter by Year", year_options)
 
 # === Apply filters ===
 filtered_df = df.copy()
-
 if selected_sector:
     filtered_df = filtered_df[filtered_df['SECTOR'].isin(selected_sector)]
 if selected_mda:
@@ -92,6 +84,5 @@ if not filtered_df.empty:
     table_df = filtered_df.groupby(['YEAR', 'MDA']).size().reset_index(name='Project Count')
     st.subheader("Summary Table by MDA and Year")
     st.dataframe(table_df)
-
 else:
     st.info("No data matches the selected filters.")
