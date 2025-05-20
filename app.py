@@ -159,40 +159,72 @@ with col6:
 
 # === CHARTS & TABLES ===
 if not filtered_df.empty:
+
+    # --- Chart: Projects by Sector ---
     if 'SECTOR' in filtered_df.columns:
         sector_counts = filtered_df['SECTOR'].value_counts().reset_index()
         sector_counts.columns = ['Sector', 'Count']
         st.plotly_chart(px.bar(sector_counts, x='Sector', y='Count', title="Projects by Sector"), use_container_width=True)
 
+    # --- Chart: Distribution by MDA ---
     if 'MDA' in filtered_df.columns:
         mda_counts = filtered_df['MDA'].value_counts().reset_index()
         mda_counts.columns = ['MDA', 'Count']
         st.plotly_chart(px.pie(mda_counts, names='MDA', values='Count', title="Distribution by MDA", hole=0.4), use_container_width=True)
 
+    # --- Table: Summary by MDA and Year ---
     if 'YEAR' in filtered_df.columns and 'MDA' in filtered_df.columns:
         summary_table = filtered_df.groupby(['YEAR', 'MDA']).size().reset_index(name='Project Count')
         st.subheader("Summary Table by MDA and Year")
         st.dataframe(summary_table)
 
+    # --- Table: Sector Head, MDA, Project Title, Contractor, Amount Now Due ---
     st.subheader("Table: Sector Head, MDA, Project Title, Contractor, Amount Now Due")
     cols1 = ['SECTOR HEAD', 'MDA', 'PROJECT TITLE', 'CONTRACTOR', column_map["AMOUNT NOW DUE"]]
     if all(c in filtered_df.columns for c in cols1):
-        st.dataframe(filtered_df[cols1])
+        display_df = filtered_df[cols1].copy()
+        display_df[column_map["AMOUNT NOW DUE"]] = display_df[column_map["AMOUNT NOW DUE"]].apply(lambda x: f"₦{x:,.2f}")
+        st.dataframe(display_df)
 
+    # --- Table: COFOG ---
     st.subheader("Table: COFOG – No. of Projects and Amount Now Due")
     if 'COFOG' in filtered_df.columns and 'PROJECT TITLE' in filtered_df.columns:
         cofog_table = filtered_df.groupby(filtered_df['COFOG'].astype(str).str.strip()).agg({
             'PROJECT TITLE': 'count',
             column_map["AMOUNT NOW DUE"]: 'sum'
         }).reset_index().rename(columns={'PROJECT TITLE': 'NO. OF PROJECTS'})
+
+        cofog_table['₦ AMOUNT NOW DUE'] = cofog_table[column_map["AMOUNT NOW DUE"]].apply(lambda x: f"₦{x:,.2f}")
+        cofog_table = cofog_table[['COFOG', 'NO. OF PROJECTS', '₦ AMOUNT NOW DUE']]
+
+        total_row = pd.DataFrame({
+            'COFOG': ['Total'],
+            'NO. OF PROJECTS': [cofog_table['NO. OF PROJECTS'].sum()],
+            '₦ AMOUNT NOW DUE': [f"₦{safe_sum(filtered_df, 'AMOUNT NOW DUE'):,.2f}"]
+        })
+        cofog_table = pd.concat([cofog_table, total_row], ignore_index=True)
+
         st.dataframe(cofog_table)
 
+    # --- Table: THEMES PILLAR ---
     st.subheader("Table: THEMES PILLAR – No. of Projects and Amount Now Due")
     if 'THEMES PILLAR' in filtered_df.columns and 'PROJECT TITLE' in filtered_df.columns:
         theme_table = filtered_df.groupby(filtered_df['THEMES PILLAR'].astype(str).str.strip()).agg({
             'PROJECT TITLE': 'count',
             column_map["AMOUNT NOW DUE"]: 'sum'
         }).reset_index().rename(columns={'PROJECT TITLE': 'NO. OF PROJECTS'})
+
+        theme_table['₦ AMOUNT NOW DUE'] = theme_table[column_map["AMOUNT NOW DUE"]].apply(lambda x: f"₦{x:,.2f}")
+        theme_table = theme_table[['THEMES PILLAR', 'NO. OF PROJECTS', '₦ AMOUNT NOW DUE']]
+
+        total_row = pd.DataFrame({
+            'THEMES PILLAR': ['Total'],
+            'NO. OF PROJECTS': [theme_table['NO. OF PROJECTS'].sum()],
+            '₦ AMOUNT NOW DUE': [f"₦{safe_sum(filtered_df, 'AMOUNT NOW DUE'):,.2f}"]
+        })
+        theme_table = pd.concat([theme_table, total_row], ignore_index=True)
+
         st.dataframe(theme_table)
+
 else:
     st.info("No data matches the selected filters.")
