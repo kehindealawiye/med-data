@@ -5,7 +5,7 @@ import pandas as pd
 from google.oauth2.service_account import Credentials
 import streamlit as st
 
-=== Load Data from Google Sheets ===
+# === Load Data from Google Sheets ===
 
 def load_data(): scope = [ "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive" ] creds_dict = st.secrets["gcp_service_account"] creds = Credentials.from_service_account_info(creds_dict, scopes=scope) client = gspread.authorize(creds)
 
