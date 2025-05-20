@@ -27,7 +27,7 @@ return df
 
 # === Load and clean data ===
 
-df df = load_data()
+df = load_data()
 df.replace('', pd.NA, inplace=True)
 df = df.dropna(how='all')
 
