@@ -109,6 +109,23 @@ if mda != 'All':
 payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
 payment_stage = st.selectbox("Filter by Payment Stage", ['All'] + sorted(payment_options))
 
+# === APPLY FILTERS ===
+filtered_df = df.copy()
+if year != 'All':
+    filtered_df = filtered_df[filtered_df['YEAR'].astype(str).str.strip() == year]
+if month != 'All':
+    filtered_df = filtered_df[filtered_df['MONTH'].astype(str).str.strip() == month]
+if lga != 'All':
+    filtered_df = filtered_df[filtered_df['LGA'].astype(str).str.strip() == lga]
+if cofog != 'All':
+    filtered_df = filtered_df[filtered_df['COFOG'].astype(str).str.strip() == cofog]
+if theme != 'All':
+    filtered_df = filtered_df[filtered_df['THEMES PILLAR'].astype(str).str.strip() == theme]
+if mda != 'All':
+    filtered_df = filtered_df[filtered_df['MDA'].astype(str).str.strip() == mda]
+if payment_stage != 'All':
+    filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip() == payment_stage]
+
 # === KPI UTILS ===
 def safe_sum(df, col_key):
     col = column_map.get(col_key)
@@ -122,6 +139,7 @@ def safe_avg(df, col_key):
         return pd.to_numeric(df[col], errors="coerce").mean()
     return 0
 
+# === KPI CALCULATIONS ===
 kpi1 = safe_sum(filtered_df, "TOTAL CONTRACT SUM EDITED")
 kpi2 = safe_sum(filtered_df, "ADVANCE PAYMENT")
 kpi3 = safe_sum(filtered_df, "PREVIOUS PAYMENT")
@@ -148,26 +166,21 @@ with col6:
 
 # === CHARTS & TABLES ===
 if not filtered_df.empty:
-
-    # --- Chart: Projects by Sector ---
     if 'SECTOR' in filtered_df.columns:
         sector_counts = filtered_df['SECTOR'].value_counts().reset_index()
         sector_counts.columns = ['Sector', 'Count']
         st.plotly_chart(px.bar(sector_counts, x='Sector', y='Count', title="Projects by Sector"), use_container_width=True)
 
-    # --- Chart: Distribution by MDA ---
     if 'MDA' in filtered_df.columns:
         mda_counts = filtered_df['MDA'].value_counts().reset_index()
         mda_counts.columns = ['MDA', 'Count']
         st.plotly_chart(px.pie(mda_counts, names='MDA', values='Count', title="Distribution by MDA", hole=0.4), use_container_width=True)
 
-    # --- Table: Summary by MDA and Year ---
     if 'YEAR' in filtered_df.columns and 'MDA' in filtered_df.columns:
         summary_table = filtered_df.groupby(['YEAR', 'MDA']).size().reset_index(name='Project Count')
         st.subheader("Summary Table by MDA and Year")
         st.dataframe(summary_table)
 
-    # --- Table: Sector Head, MDA, Project Title, Contractor, Amount Now Due ---
     st.subheader("Table: Sector Head, MDA, Project Title, Contractor, Amount Now Due")
     cols1 = ['SECTOR HEAD', 'MDA', 'PROJECT TITLE', 'CONTRACTOR', column_map["AMOUNT NOW DUE"]]
     if all(c in filtered_df.columns for c in cols1):
@@ -175,7 +188,6 @@ if not filtered_df.empty:
         display_df[column_map["AMOUNT NOW DUE"]] = display_df[column_map["AMOUNT NOW DUE"]].apply(lambda x: f"₦{x:,.2f}")
         st.dataframe(display_df)
 
-    # --- Table: COFOG ---
     st.subheader("Table: COFOG – No. of Projects and Amount Now Due")
     if 'COFOG' in filtered_df.columns and 'PROJECT TITLE' in filtered_df.columns:
         cofog_table = filtered_df.groupby(filtered_df['COFOG'].astype(str).str.strip()).agg({
@@ -195,7 +207,6 @@ if not filtered_df.empty:
 
         st.dataframe(cofog_table)
 
-    # --- Table: THEMES PILLAR ---
     st.subheader("Table: THEMES PILLAR – No. of Projects and Amount Now Due")
     if 'THEMES PILLAR' in filtered_df.columns and 'PROJECT TITLE' in filtered_df.columns:
         theme_table = filtered_df.groupby(filtered_df['THEMES PILLAR'].astype(str).str.strip()).agg({
@@ -214,6 +225,5 @@ if not filtered_df.empty:
         theme_table = pd.concat([theme_table, total_row], ignore_index=True)
 
         st.dataframe(theme_table)
-
 else:
     st.info("No data matches the selected filters.")
