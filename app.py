@@ -75,52 +75,41 @@ year = st.selectbox("Filter by Year", get_unique_with_all('YEAR'))
 
 # === MONTH FILTER BASED ON YEAR ===
 month_col = 'MONTH'
-month_values = []
-
 if month_col in df.columns:
     df[month_col] = df[month_col].astype(str).str.strip()
 
-    if year != 'All' and 'YEAR' in df.columns:
-        year_filtered = df[df['YEAR'].astype(str).str.strip() == year]
-        month_values = year_filtered[month_col].dropna().unique().tolist()
-    else:
-        month_values = df[month_col].dropna().unique().tolist()
-
-month_options = ['All'] + sorted(month_values)
-month = st.selectbox("Filter by Month", month_options)
+month_values = df[month_col].dropna().unique().tolist() if year == 'All' else df[df['YEAR'].astype(str).str.strip() == year][month_col].dropna().unique().tolist()
+month = st.selectbox("Filter by Month", ['All'] + sorted(month_values))
 
 lga = st.selectbox("Filter by LGA", get_unique_with_all('LGA'))
 cofog = st.selectbox("Filter by COFOG", get_unique_with_all('COFOG'))
 theme = st.selectbox("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'))
-payment_stage = st.selectbox("Filter by Payment Stage", get_unique_with_all('PAYMENT STAGE'))
 
+# === MDA Filter Based on COFOG and THEMES ===
 filtered_for_mda = df.copy()
 if cofog != 'All':
     filtered_for_mda = filtered_for_mda[filtered_for_mda['COFOG'].astype(str).str.strip() == cofog]
 if theme != 'All':
     filtered_for_mda = filtered_for_mda[filtered_for_mda['THEMES PILLAR'].astype(str).str.strip() == theme]
 
-mda_options = get_unique_with_all('MDA')
-mda = st.multiselect("Filter by MDA", mda_options, default=['All'])
+mda_options = filtered_for_mda['MDA'].dropna().astype(str).str.strip().unique().tolist()
+mda = st.selectbox("Filter by MDA", ['All'] + sorted(mda_options))
 
-# === APPLY FILTERS ===
-filtered_df = df.copy()
+# === PAYMENT STAGE Filter Based on Year, Month, MDA, LGA ===
+filtered_for_stage = df.copy()
 if year != 'All':
-    filtered_df = filtered_df[filtered_df['YEAR'].astype(str).str.strip() == year]
-if month != 'All' and month_col in filtered_df.columns:
-    filtered_df = filtered_df[filtered_df[month_col].astype(str).str.strip() == month]
+    filtered_for_stage = filtered_for_stage[filtered_for_stage['YEAR'].astype(str).str.strip() == year]
+if month != 'All':
+    filtered_for_stage = filtered_for_stage[filtered_for_stage['MONTH'].astype(str).str.strip() == month]
 if lga != 'All':
-    filtered_df = filtered_df[filtered_df['LGA'].astype(str).str.strip() == lga]
-if cofog != 'All':
-    filtered_df = filtered_df[filtered_df['COFOG'].astype(str).str.strip() == cofog]
-if theme != 'All':
-    filtered_df = filtered_df[filtered_df['THEMES PILLAR'].astype(str).str.strip() == theme]
-if payment_stage != 'All':
-    filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip() == payment_stage]
-if 'All' not in mda and mda:
-    filtered_df = filtered_df[filtered_df['MDA'].isin(mda)]
+    filtered_for_stage = filtered_for_stage[filtered_for_stage['LGA'].astype(str).str.strip() == lga]
+if mda != 'All':
+    filtered_for_stage = filtered_for_stage[filtered_for_stage['MDA'].astype(str).str.strip() == mda]
 
-# === KPI CALCULATIONS ===
+payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
+payment_stage = st.selectbox("Filter by Payment Stage", ['All'] + sorted(payment_options))
+
+# === KPI UTILS ===
 def safe_sum(df, col_key):
     col = column_map.get(col_key)
     if col and col in df.columns:
