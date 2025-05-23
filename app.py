@@ -113,24 +113,24 @@ if 'All' not in mda and mda:
 payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
 payment_stage = st.sidebar.selectbox("Filter by Payment Stage", ['All'] + sorted(payment_options))
 
-
 # === APPLY FILTERS ===
 filtered_df = df.copy()
-if year != 'All':
-    filtered_df = filtered_df[filtered_df['YEAR'].astype(str).str.strip() == year]
-if month != 'All':
-    filtered_df = filtered_df[filtered_df['MONTH'].astype(str).str.strip() == month]
-if lga != 'All':
-    filtered_df = filtered_df[filtered_df['LGA'].astype(str).str.strip() == lga]
-if cofog != 'All':
-    filtered_df = filtered_df[filtered_df['COFOG'].astype(str).str.strip() == cofog]
-if theme != 'All':
-    filtered_df = filtered_df[filtered_df['THEMES PILLAR'].astype(str).str.strip() == theme]
-if mda != 'All':
-    filtered_df = filtered_df[filtered_df['MDA'].astype(str).str.strip() == mda]
+
+if 'All' not in year and year:
+    filtered_df = filtered_df[filtered_df['YEAR'].astype(str).str.strip().isin(year)]
+if 'All' not in month and month:
+    filtered_df = filtered_df[filtered_df['MONTH'].astype(str).str.strip().isin(month)]
+if 'All' not in lga and lga:
+    filtered_df = filtered_df[filtered_df['LGA'].astype(str).str.strip().isin(lga)]
+if 'All' not in cofog and cofog:
+    filtered_df = filtered_df[filtered_df['COFOG'].astype(str).str.strip().isin(cofog)]
+if 'All' not in theme and theme:
+    filtered_df = filtered_df[filtered_df['THEMES PILLAR'].astype(str).str.strip().isin(theme)]
+if 'All' not in mda and mda:
+    filtered_df = filtered_df[filtered_df['MDA'].astype(str).str.strip().isin(mda)]
 if payment_stage != 'All':
     filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip() == payment_stage]
-
+    
 # === KPI UTILS ===
 def safe_sum(df, col_key):
     col = column_map.get(col_key)
