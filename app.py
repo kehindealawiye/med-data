@@ -71,7 +71,7 @@ def get_unique_with_all(column):
     values = df[column].dropna().astype(str).str.strip().unique().tolist() if column in df.columns else []
     return ['All'] + sorted(values)
 
-year = st.sidebar.selectbox("Filter by Year", get_unique_with_all('YEAR'))
+year = st.sidebar.multiselect("Filter by Year", get_unique_with_all('YEAR'))
 
 # === MONTH FILTER BASED ON YEAR ===
 month_col = 'MONTH'
@@ -79,11 +79,11 @@ if month_col in df.columns:
     df[month_col] = df[month_col].astype(str).str.strip()
 
 month_values = df[month_col].dropna().unique().tolist() if year == 'All' else df[df['YEAR'].astype(str).str.strip() == year][month_col].dropna().unique().tolist()
-month = st.sidebar.selectbox("Filter by Month", ['All'] + sorted(month_values))
+month = st.sidebar.multiselect("Filter by Month", ['All'] + sorted(month_values))
 
-lga = st.sidebar.selectbox("Filter by LGA", get_unique_with_all('LGA'))
-cofog = st.sidebar.selectbox("Filter by COFOG", get_unique_with_all('COFOG'))
-theme = st.sidebar.selectbox("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'))
+lga = st.sidebar.multiselect("Filter by LGA", get_unique_with_all('LGA'))
+cofog = st.sidebar.multiselect("Filter by COFOG", get_unique_with_all('COFOG'))
+theme = st.sidebar.multiselect("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'))
 
 # === MDA Filter Based on COFOG and THEMES ===
 filtered_for_mda = df.copy()
