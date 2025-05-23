@@ -71,43 +71,48 @@ def get_unique_with_all(column):
     values = df[column].dropna().astype(str).str.strip().unique().tolist() if column in df.columns else []
     return ['All'] + sorted(values)
 
-year = st.sidebar.multiselect("Filter by Year", get_unique_with_all('YEAR'))
+year = st.sidebar.multiselect("Filter by Year", get_unique_with_all('YEAR'), default=['All'])
 
 # === MONTH FILTER BASED ON YEAR ===
 month_col = 'MONTH'
 if month_col in df.columns:
     df[month_col] = df[month_col].astype(str).str.strip()
 
-month_values = df[month_col].dropna().unique().tolist() if year == 'All' else df[df['YEAR'].astype(str).str.strip() == year][month_col].dropna().unique().tolist()
-month = st.sidebar.multiselect("Filter by Month", ['All'] + sorted(month_values))
+if 'All' in year or not year:
+    month_values = df[month_col].dropna().unique().tolist()
+else:
+    month_values = df[df['YEAR'].astype(str).str.strip().isin(year)][month_col].dropna().unique().tolist()
 
-lga = st.sidebar.multiselect("Filter by LGA", get_unique_with_all('LGA'))
-cofog = st.sidebar.multiselect("Filter by COFOG", get_unique_with_all('COFOG'))
-theme = st.sidebar.multiselect("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'))
+month = st.sidebar.multiselect("Filter by Month", ['All'] + sorted(month_values), default=['All'])
+
+lga = st.sidebar.multiselect("Filter by LGA", get_unique_with_all('LGA'), default=['All'])
+cofog = st.sidebar.multiselect("Filter by COFOG", get_unique_with_all('COFOG'), default=['All'])
+theme = st.sidebar.multiselect("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'), default=['All'])
 
 # === MDA Filter Based on COFOG and THEMES ===
 filtered_for_mda = df.copy()
-if cofog != 'All':
-    filtered_for_mda = filtered_for_mda[filtered_for_mda['COFOG'].astype(str).str.strip() == cofog]
-if theme != 'All':
-    filtered_for_mda = filtered_for_mda[filtered_for_mda['THEMES PILLAR'].astype(str).str.strip() == theme]
+if 'All' not in cofog and cofog:
+    filtered_for_mda = filtered_for_mda[filtered_for_mda['COFOG'].astype(str).str.strip().isin(cofog)]
+if 'All' not in theme and theme:
+    filtered_for_mda = filtered_for_mda[filtered_for_mda['THEMES PILLAR'].astype(str).str.strip().isin(theme)]
 
 mda_options = filtered_for_mda['MDA'].dropna().astype(str).str.strip().unique().tolist()
-mda = st.sidebar.selectbox("Filter by MDA", ['All'] + sorted(mda_options))
+mda = st.sidebar.multiselect("Filter by MDA", ['All'] + sorted(mda_options), default=['All'])
 
 # === PAYMENT STAGE Filter Based on Year, Month, MDA, LGA ===
 filtered_for_stage = df.copy()
-if year != 'All':
-    filtered_for_stage = filtered_for_stage[filtered_for_stage['YEAR'].astype(str).str.strip() == year]
-if month != 'All':
-    filtered_for_stage = filtered_for_stage[filtered_for_stage['MONTH'].astype(str).str.strip() == month]
-if lga != 'All':
-    filtered_for_stage = filtered_for_stage[filtered_for_stage['LGA'].astype(str).str.strip() == lga]
-if mda != 'All':
-    filtered_for_stage = filtered_for_stage[filtered_for_stage['MDA'].astype(str).str.strip() == mda]
+if 'All' not in year and year:
+    filtered_for_stage = filtered_for_stage[filtered_for_stage['YEAR'].astype(str).str.strip().isin(year)]
+if 'All' not in month and month:
+    filtered_for_stage = filtered_for_stage[filtered_for_stage['MONTH'].astype(str).str.strip().isin(month)]
+if 'All' not in lga and lga:
+    filtered_for_stage = filtered_for_stage[filtered_for_stage['LGA'].astype(str).str.strip().isin(lga)]
+if 'All' not in mda and mda:
+    filtered_for_stage = filtered_for_stage[filtered_for_stage['MDA'].astype(str).str.strip().isin(mda)]
 
 payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
 payment_stage = st.sidebar.selectbox("Filter by Payment Stage", ['All'] + sorted(payment_options))
+
 
 # === APPLY FILTERS ===
 filtered_df = df.copy()
