@@ -111,7 +111,7 @@ if 'All' not in mda and mda:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['MDA'].astype(str).str.strip().isin(mda)]
 
 payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
-payment_stage = st.sidebar.selectbox("Filter by Payment Stage", ['All'] + sorted(payment_options))
+payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
 
 # === APPLY FILTERS ===
 filtered_df = df.copy()
@@ -128,8 +128,8 @@ if 'All' not in theme and theme:
     filtered_df = filtered_df[filtered_df['THEMES PILLAR'].astype(str).str.strip().isin(theme)]
 if 'All' not in mda and mda:
     filtered_df = filtered_df[filtered_df['MDA'].astype(str).str.strip().isin(mda)]
-if payment_stage != 'All':
-    filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip() == payment_stage]
+if 'All' not in payment_stage and payment_stage:
+    filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip().isin(payment_stage)]
     
 # === KPI UTILS ===
 def safe_sum(df, col_key):
