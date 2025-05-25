@@ -1,6 +1,5 @@
 # === IMPORTS ===
 import streamlit as st
-st.set_option('client.showErrorDetails', True)
 import gspread
 import pandas as pd
 import plotly.express as px
@@ -64,7 +63,9 @@ for col in column_map.values():
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
 # === PAGE CONFIG ===
-st.set_page_config(page_title="Programme Performance Dashboard", layout="wide")
+# Fix: force app to bind to Railway port
+port = int(os.environ.get("PORT", 8501))
+st.set_page_config(page_title="Project Performance Dashboard", layout="wide")
 st.title("📊🧾 MED Certification Approvals Dashboard")
 
 # === FILTERS ===
