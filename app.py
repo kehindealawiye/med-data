@@ -63,8 +63,6 @@ for col in column_map.values():
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
 # === PAGE CONFIG ===
-# Fix: force app to bind to Railway port
-port = int(os.environ.get("PORT", 8501))
 st.set_page_config(page_title="Project Performance Dashboard", layout="wide")
 st.title("📊🧾 MED Certification Approvals Dashboard")
 
