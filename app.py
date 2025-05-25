@@ -1,5 +1,6 @@
 # === IMPORTS ===
 import streamlit as st
+st.set_option('client.showErrorDetails', True)
 import gspread
 import pandas as pd
 import plotly.express as px
