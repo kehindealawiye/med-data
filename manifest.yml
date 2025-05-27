@@ -1,0 +1,6 @@
+artifacts:
+  - app.py
+  - requirements.txt
+
+streamlit:
+  file: app.py
