@@ -85,6 +85,7 @@ else:
 
 month = st.sidebar.multiselect("Filter by Month", ['All'] + sorted(month_values), default=['All'])
 
+status = st.sidebar.multiselect("Filter by STATUS", get_unique_with_all('STATUS'), default=['All'])
 lga = st.sidebar.multiselect("Filter by LGA", get_unique_with_all('LGA'), default=['All'])
 cofog = st.sidebar.multiselect("Filter by COFOG", get_unique_with_all('COFOG'), default=['All'])
 theme = st.sidebar.multiselect("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'), default=['All'])
