@@ -73,17 +73,32 @@ def get_unique_with_all(column):
 
 year = st.sidebar.multiselect("Filter by Year", get_unique_with_all('YEAR'), default=['All'])
 
+# === COLUMN CLEANUP & RENAMING ===
+if 'MONTH' in df.columns:
+    df.rename(columns={'MONTH': 'APPROVAL MONTH'}, inplace=True)
+
+# Clean strings
+for col in ['APPROVAL MONTH', 'MONTH APPLICABLE']:
+    if col in df.columns:
+        df[col] = df[col].astype(str).str.strip()
+
 # === MONTH FILTER BASED ON YEAR ===
-month_col = 'MONTH'
-if month_col in df.columns:
-    df[month_col] = df[month_col].astype(str).str.strip()
-
 if 'All' in year or not year:
-    month_values = df[month_col].dropna().unique().tolist()
+    approval_month_values = df['APPROVAL MONTH'].dropna().unique().tolist()
 else:
-    month_values = df[df['YEAR'].astype(str).str.strip().isin(year)][month_col].dropna().unique().tolist()
+    approval_month_values = df[df['YEAR'].astype(str).str.strip().isin(year)]['APPROVAL MONTH'].dropna().unique().tolist()
 
-month = st.sidebar.multiselect("Filter by Month", ['All'] + sorted(month_values), default=['All'])
+if 'MONTH APPLICABLE' in df.columns:
+    if 'All' in year or not year:
+        month_values = df['MONTH APPLICABLE'].dropna().unique().tolist()
+    else:
+        month_values = df[df['YEAR'].astype(str).str.strip().isin(year)]['MONTH APPLICABLE'].dropna().unique().tolist()
+else:
+    month_values = []
+
+# === SIDEBAR FILTERS ===
+month = st.sidebar.multiselect("Filter by MONTH APPLICABLE", ['All'] + sorted(month_values), default=['All'])
+approval_month = st.sidebar.multiselect("Filter by APPROVAL MONTH", ['All'] + sorted(approval_month_values), default=['All'])
 status = st.sidebar.multiselect("Filter by STATUS", get_unique_with_all('STATUS'), default=['All'])
 lga = st.sidebar.multiselect("Filter by LGA", get_unique_with_all('LGA'), default=['All'])
 cofog = st.sidebar.multiselect("Filter by COFOG", get_unique_with_all('COFOG'), default=['All'])
@@ -99,30 +114,31 @@ if 'All' not in theme and theme:
 mda_options = filtered_for_mda['MDA'].dropna().astype(str).str.strip().unique().tolist()
 mda = st.sidebar.multiselect("Filter by MDA", ['All'] + sorted(mda_options), default=['All'])
 
-# === PAYMENT STAGE Filter Based on Year, Month, MDA, LGA ===
+# === PAYMENT STAGE Filter Based on filters ===
 filtered_for_stage = df.copy()
 if 'All' not in year and year:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['YEAR'].astype(str).str.strip().isin(year)]
 if 'All' not in month and month:
-    filtered_for_stage = filtered_for_stage[filtered_for_stage['MONTH'].astype(str).str.strip().isin(month)]
+    filtered_for_stage = filtered_for_stage[filtered_for_stage['MONTH APPLICABLE'].astype(str).str.strip().isin(month)]
+if 'All' not in approval_month and approval_month:
+    filtered_for_stage = filtered_for_stage[filtered_for_stage['APPROVAL MONTH'].astype(str).str.strip().isin(approval_month)]
 if 'All' not in lga and lga:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['LGA'].astype(str).str.strip().isin(lga)]
 if 'All' not in mda and mda:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['MDA'].astype(str).str.strip().isin(mda)]
 
-# ✅ Only filter STATUS once below, NOT here
-# ✅ Make sure you do NOT reference filtered_df here
-
 payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
 payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
 
-# === APPLY FILTERS ===
+# === FINAL FILTERS (filtered_df) ===
 filtered_df = df.copy()
 
 if 'All' not in year and year:
     filtered_df = filtered_df[filtered_df['YEAR'].astype(str).str.strip().isin(year)]
 if 'All' not in month and month:
-    filtered_df = filtered_df[filtered_df['MONTH'].astype(str).str.strip().isin(month)]
+    filtered_df = filtered_df[filtered_df['MONTH APPLICABLE'].astype(str).str.strip().isin(month)]
+if 'All' not in approval_month and approval_month:
+    filtered_df = filtered_df[filtered_df['APPROVAL MONTH'].astype(str).str.strip().isin(approval_month)]
 if 'All' not in lga and lga:
     filtered_df = filtered_df[filtered_df['LGA'].astype(str).str.strip().isin(lga)]
 if 'All' not in cofog and cofog:
@@ -131,12 +147,9 @@ if 'All' not in theme and theme:
     filtered_df = filtered_df[filtered_df['THEMES PILLAR'].astype(str).str.strip().isin(theme)]
 if 'All' not in mda and mda:
     filtered_df = filtered_df[filtered_df['MDA'].astype(str).str.strip().isin(mda)]
-
-# ✅ Correct location for STATUS filter
 if 'STATUS' in filtered_df.columns and status and 'All' not in status:
     status_clean = [s.strip() for s in status]
     filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status_clean)]
-
 if 'All' not in payment_stage and payment_stage:
     filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip().isin(payment_stage)]
 
