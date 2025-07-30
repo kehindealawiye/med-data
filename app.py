@@ -86,10 +86,17 @@ for col in ['APPROVAL MONTH', 'MONTH APPLICABLE']:
 if 'MONTH' in df.columns:
     df.rename(columns={'MONTH': 'APPROVAL MONTH'}, inplace=True)
 
-# Clean strings robustly
+# === Safe string cleaning function ===
+def safe_strip(val):
+    try:
+        return str(val).strip() if pd.notnull(val) else val
+    except:
+        return val
+
+# Clean strings safely for specific columns
 for col in ['APPROVAL MONTH', 'MONTH APPLICABLE']:
     if col in df.columns:
-        df[col] = df[col].apply(lambda x: str(x).strip() if pd.notna(x) else x)
+        df[col] = df[col].apply(safe_strip)
 
 # === MONTH FILTER BASED ON YEAR ===
 if 'All' in year or not year:
