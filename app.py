@@ -107,6 +107,11 @@ status = st.sidebar.multiselect("Filter by STATUS", get_unique_with_all('STATUS'
 lga = st.sidebar.multiselect("Filter by LGA", get_unique_with_all('LGA'), default=['All'], key="filter_lga")
 cofog = st.sidebar.multiselect("Filter by COFOG", get_unique_with_all('COFOG'), default=['All'], key="filter_cofog")
 theme = st.sidebar.multiselect("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'), default=['All'], key="filter_theme")
+mda_options = filtered_for_mda['MDA'].dropna().astype(str).str.strip().unique().tolist()
+mda = st.sidebar.multiselect("Filter by MDA", ['All'] + sorted(mda_options), default=['All'], key="filter_mda")
+payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
+payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
+
 
 # === MDA Filter Based on COFOG and THEMES ===
 filtered_for_mda = df.copy()
@@ -114,12 +119,6 @@ if 'All' not in cofog and cofog:
     filtered_for_mda = filtered_for_mda[filtered_for_mda['COFOG'].astype(str).str.strip().isin(cofog)]
 if 'All' not in theme and theme:
     filtered_for_mda = filtered_for_mda[filtered_for_mda['THEMES PILLAR'].astype(str).str.strip().isin(theme)]
-
-mda_options = filtered_for_mda['MDA'].dropna().astype(str).str.strip().unique().tolist()
-mda = st.sidebar.multiselect("Filter by MDA", ['All'] + sorted(mda_options), default=['All'], key="filter_mda")
-
-payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
-payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
 
 # === PAYMENT STAGE Filter Options Based on Other Filters ===
 filtered_for_stage = df.copy()
@@ -136,50 +135,35 @@ if 'All' not in mda and mda:
 
 # === FINAL FILTERS (filtered_df) ===
 filtered_df = df.copy()
-if 'All' not in year and year:
-    filtered_df = filtered_df[filtered_df['YEAR'].astype(str).str.strip().isin(year)]
-if 'All' not in month and month:
-    filtered_df = filtered_df[filtered_df['MONTH APPLICABLE'].astype(str).str.strip().isin(month)]
-if 'All' not in approval_month and approval_month:
-    filtered_df = filtered_df[filtered_df['APPROVAL MONTH'].astype(str).str.strip().isin(approval_month)]
-if 'All' not in lga and lga:
-    filtered_df = filtered_df[filtered_df['LGA'].astype(str).str.strip().isin(lga)]
-if 'All' not in cofog and cofog:
-    filtered_df = filtered_df[filtered_df['COFOG'].astype(str).str.strip().isin(cofog)]
-if 'All' not in theme and theme:
-    filtered_df = filtered_df[filtered_df['THEMES PILLAR'].astype(str).str.strip().isin(theme)]
-if 'All' not in mda and mda:
-    filtered_df = filtered_df[filtered_df['MDA'].astype(str).str.strip().isin(mda)]
-if 'STATUS' in filtered_df.columns and status and 'All' not in status:
-    status_clean = [s.strip() for s in status]
-    filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status_clean)]
-if 'All' not in payment_stage and payment_stage:
-    filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip().isin(payment_stage)]
-
-# === FINAL FILTERS (filtered_df) ===
-filtered_df = df.copy()
 
 if 'All' not in year and year:
     filtered_df = filtered_df[filtered_df['YEAR'].astype(str).str.strip().isin(year)]
+
 if 'All' not in month and month:
     filtered_df = filtered_df[filtered_df['MONTH APPLICABLE'].astype(str).str.strip().isin(month)]
+
 if 'All' not in approval_month and approval_month:
     filtered_df = filtered_df[filtered_df['APPROVAL MONTH'].astype(str).str.strip().isin(approval_month)]
+
 if 'All' not in lga and lga:
     filtered_df = filtered_df[filtered_df['LGA'].astype(str).str.strip().isin(lga)]
+
 if 'All' not in cofog and cofog:
     filtered_df = filtered_df[filtered_df['COFOG'].astype(str).str.strip().isin(cofog)]
+
 if 'All' not in theme and theme:
     filtered_df = filtered_df[filtered_df['THEMES PILLAR'].astype(str).str.strip().isin(theme)]
+
 if 'All' not in mda and mda:
     filtered_df = filtered_df[filtered_df['MDA'].astype(str).str.strip().isin(mda)]
+
 if 'STATUS' in filtered_df.columns and status and 'All' not in status:
     status_clean = [s.strip() for s in status]
     filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status_clean)]
-if 'All' not in payment_stage and payment_stage:
-    filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip().isin(payment_stage)]
 
-
+if 'PAYMENT STAGE' in filtered_df.columns and payment_stage and 'All' not in payment_stage:
+    payment_stage_clean = [s.strip() for s in payment_stage]
+    filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip().isin(payment_stage_clean)]
     
 # === KPI UTILS ===
 def safe_sum(df, col_key):
