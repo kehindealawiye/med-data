@@ -118,6 +118,9 @@ if 'All' not in theme and theme:
 mda_options = filtered_for_mda['MDA'].dropna().astype(str).str.strip().unique().tolist()
 mda = st.sidebar.multiselect("Filter by MDA", ['All'] + sorted(mda_options), default=['All'], key="filter_mda")
 
+payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
+payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
+
 # === PAYMENT STAGE Filter Options Based on Other Filters ===
 filtered_for_stage = df.copy()
 if 'All' not in year and year:
@@ -152,9 +155,6 @@ if 'STATUS' in filtered_df.columns and status and 'All' not in status:
     filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status_clean)]
 if 'All' not in payment_stage and payment_stage:
     filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip().isin(payment_stage)]
-
-payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
-payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
 
 # === FINAL FILTERS (filtered_df) ===
 filtered_df = df.copy()
