@@ -77,10 +77,10 @@ year = st.sidebar.multiselect("Filter by Year", get_unique_with_all('YEAR'), def
 if 'MONTH' in df.columns:
     df.rename(columns={'MONTH': 'APPROVAL MONTH'}, inplace=True)
 
-# Clean strings
+# Clean strings safely
 for col in ['APPROVAL MONTH', 'MONTH APPLICABLE']:
     if col in df.columns:
-        df[col] = df[col].astype(str).str.strip()
+        df[col] = df[col].apply(lambda x: str(x).strip() if pd.notna(x) else x)
 
 # === COLUMN CLEANUP & RENAMING ===
 if 'MONTH' in df.columns:
