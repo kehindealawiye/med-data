@@ -82,6 +82,15 @@ for col in ['APPROVAL MONTH', 'MONTH APPLICABLE']:
     if col in df.columns:
         df[col] = df[col].astype(str).str.strip()
 
+# === COLUMN CLEANUP & RENAMING ===
+if 'MONTH' in df.columns:
+    df.rename(columns={'MONTH': 'APPROVAL MONTH'}, inplace=True)
+
+# Clean strings robustly
+for col in ['APPROVAL MONTH', 'MONTH APPLICABLE']:
+    if col in df.columns:
+        df[col] = df[col].apply(lambda x: str(x).strip() if pd.notna(x) else x)
+
 # === MONTH FILTER BASED ON YEAR ===
 if 'All' in year or not year:
     approval_month_values = df['APPROVAL MONTH'].dropna().unique().tolist()
