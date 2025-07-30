@@ -109,10 +109,9 @@ if 'All' not in lga and lga:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['LGA'].astype(str).str.strip().isin(lga)]
 if 'All' not in mda and mda:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['MDA'].astype(str).str.strip().isin(mda)]
-if 'STATUS' in filtered_df.columns and status and 'All' not in status:
-    # Strip both selected values and df values to avoid mismatch
-    status_clean = [s.strip() for s in status]
-    filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status_clean)]
+
+# ✅ Only filter STATUS once below, NOT here
+# ✅ Make sure you do NOT reference filtered_df here
 
 payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
 payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
@@ -132,10 +131,12 @@ if 'All' not in theme and theme:
     filtered_df = filtered_df[filtered_df['THEMES PILLAR'].astype(str).str.strip().isin(theme)]
 if 'All' not in mda and mda:
     filtered_df = filtered_df[filtered_df['MDA'].astype(str).str.strip().isin(mda)]
-# ✅ Check if STATUS exists before filtering
+
+# ✅ Correct location for STATUS filter
 if 'STATUS' in filtered_df.columns and status and 'All' not in status:
     status_clean = [s.strip() for s in status]
     filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status_clean)]
+
 if 'All' not in payment_stage and payment_stage:
     filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip().isin(payment_stage)]
 
