@@ -107,11 +107,6 @@ status = st.sidebar.multiselect("Filter by STATUS", get_unique_with_all('STATUS'
 lga = st.sidebar.multiselect("Filter by LGA", get_unique_with_all('LGA'), default=['All'], key="filter_lga")
 cofog = st.sidebar.multiselect("Filter by COFOG", get_unique_with_all('COFOG'), default=['All'], key="filter_cofog")
 theme = st.sidebar.multiselect("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'), default=['All'], key="filter_theme")
-mda_options = filtered_for_mda['MDA'].dropna().astype(str).str.strip().unique().tolist()
-mda = st.sidebar.multiselect("Filter by MDA", ['All'] + sorted(mda_options), default=['All'], key="filter_mda")
-payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
-payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
-
 
 # === MDA Filter Based on COFOG and THEMES ===
 filtered_for_mda = df.copy()
@@ -119,6 +114,9 @@ if 'All' not in cofog and cofog:
     filtered_for_mda = filtered_for_mda[filtered_for_mda['COFOG'].astype(str).str.strip().isin(cofog)]
 if 'All' not in theme and theme:
     filtered_for_mda = filtered_for_mda[filtered_for_mda['THEMES PILLAR'].astype(str).str.strip().isin(theme)]
+
+mda_options = filtered_for_mda['MDA'].dropna().astype(str).str.strip().unique().tolist()
+mda = st.sidebar.multiselect("Filter by MDA", ['All'] + sorted(mda_options), default=['All'], key="filter_mda")
 
 # === PAYMENT STAGE Filter Options Based on Other Filters ===
 filtered_for_stage = df.copy()
@@ -132,6 +130,10 @@ if 'All' not in lga and lga:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['LGA'].astype(str).str.strip().isin(lga)]
 if 'All' not in mda and mda:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['MDA'].astype(str).str.strip().isin(mda)]
+
+payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
+payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
+
 
 # === FINAL FILTERS (filtered_df) ===
 filtered_df = df.copy()
