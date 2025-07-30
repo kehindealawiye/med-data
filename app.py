@@ -131,9 +131,6 @@ if 'All' not in lga and lga:
 if 'All' not in mda and mda:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['MDA'].astype(str).str.strip().isin(mda)]
 
-payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
-payment_stage = st.sidebar.multiselect("Filter by PAYMENT STAGE", ['All'] + sorted(payment_options), default=['All'], key="filter_payment_stage")
-
 # === FINAL FILTERS (filtered_df) ===
 filtered_df = df.copy()
 if 'All' not in year and year:
