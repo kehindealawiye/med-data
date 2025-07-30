@@ -133,8 +133,9 @@ if 'All' not in theme and theme:
 if 'All' not in mda and mda:
     filtered_df = filtered_df[filtered_df['MDA'].astype(str).str.strip().isin(mda)]
 # ✅ Check if STATUS exists before filtering
-if 'STATUS' in filtered_df.columns and 'All' not in status and status:
-    filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status)]
+if 'STATUS' in filtered_df.columns and status and 'All' not in status:
+    status_clean = [s.strip() for s in status]
+    filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status_clean)]
 if 'All' not in payment_stage and payment_stage:
     filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip().isin(payment_stage)]
 
