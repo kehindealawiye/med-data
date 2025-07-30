@@ -110,6 +110,8 @@ if 'All' not in lga and lga:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['LGA'].astype(str).str.strip().isin(lga)]
 if 'All' not in mda and mda:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['MDA'].astype(str).str.strip().isin(mda)]
+if 'All' not in status and status:
+    filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status)]
 
 payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
 payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
@@ -131,6 +133,9 @@ if 'All' not in mda and mda:
     filtered_df = filtered_df[filtered_df['MDA'].astype(str).str.strip().isin(mda)]
 if 'All' not in payment_stage and payment_stage:
     filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip().isin(payment_stage)]
+if 'All' not in status and status:
+    filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status)]
+
     
 # === KPI UTILS ===
 def safe_sum(df, col_key):
