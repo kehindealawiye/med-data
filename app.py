@@ -84,7 +84,6 @@ else:
     month_values = df[df['YEAR'].astype(str).str.strip().isin(year)][month_col].dropna().unique().tolist()
 
 month = st.sidebar.multiselect("Filter by Month", ['All'] + sorted(month_values), default=['All'])
-
 status = st.sidebar.multiselect("Filter by STATUS", get_unique_with_all('STATUS'), default=['All'])
 lga = st.sidebar.multiselect("Filter by LGA", get_unique_with_all('LGA'), default=['All'])
 cofog = st.sidebar.multiselect("Filter by COFOG", get_unique_with_all('COFOG'), default=['All'])
@@ -110,8 +109,10 @@ if 'All' not in lga and lga:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['LGA'].astype(str).str.strip().isin(lga)]
 if 'All' not in mda and mda:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['MDA'].astype(str).str.strip().isin(mda)]
-if 'All' not in status and status:
-    filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status)]
+if 'STATUS' in filtered_df.columns and status and 'All' not in status:
+    # Strip both selected values and df values to avoid mismatch
+    status_clean = [s.strip() for s in status]
+    filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status_clean)]
 
 payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
 payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
