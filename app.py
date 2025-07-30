@@ -93,7 +93,14 @@ def safe_strip(val):
     except:
         return val
 
-# Clean strings safely for specific columns
+# === SAFE STRING CLEANING FUNCTION ===
+def safe_strip(val):
+    try:
+        return str(val).strip() if pd.notnull(val) else val
+    except:
+        return val
+
+# === CLEAN TARGET COLUMNS SAFELY ===
 for col in ['APPROVAL MONTH', 'MONTH APPLICABLE']:
     if col in df.columns:
         df[col] = df[col].apply(safe_strip)
@@ -168,6 +175,7 @@ if 'STATUS' in filtered_df.columns and status and 'All' not in status:
     filtered_df = filtered_df[filtered_df['STATUS'].astype(str).str.strip().isin(status_clean)]
 if 'All' not in payment_stage and payment_stage:
     filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip().isin(payment_stage)]
+
 
     
 # === KPI UTILS ===
