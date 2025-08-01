@@ -185,7 +185,8 @@ kpi1 = safe_sum(filtered_df, "TOTAL CONTRACT SUM EDITED")
 kpi2 = safe_sum(filtered_df, "ADVANCE PAYMENT")
 kpi3 = safe_sum(filtered_df, "PREVIOUS PAYMENT")
 kpi4 = safe_sum(filtered_df, "AMOUNT NOW DUE")
-kpi5 = filtered_df['DATE OF APPROVAL'].notna().sum() if 'DATE OF APPROVAL' in filtered_df else 0
+kpi5a = filtered_df['PROJECT TITLE'].notna().sum() if 'PROJECT TITLE' in filtered_df else 0  # TOTAL NO. OF PROJECTS
+kpi5 = filtered_df['DATE OF APPROVAL'].notna().sum() if 'DATE OF APPROVAL' in filtered_df else 0  # TOTAL APPROVED CERTIFICATES
 kpi6 = safe_avg(filtered_df, "CONTRACTOR JOB RATING")
 
 # === KPI CARDS ===
@@ -201,10 +202,15 @@ col4, col5, col6 = st.columns(3)
 with col4:
     st.metric("TOTAL AMOUNT NOW DUE", f"₦{kpi4:,.2f}")
 with col5:
-    st.metric("TOTAL APPROVED CERTIFICATES", f"{kpi5:,}")
+    st.metric("TOTAL NO. OF PROJECTS", f"{kpi5a:,}")
 with col6:
-    st.metric("AVG CONTRACTOR JOB RATING", f"{kpi6:.1f} / 5")
+    st.metric("TOTAL APPROVED CERTIFICATES", f"{kpi5:,}")
 
+# === Optional third row for rating ===
+col7, _, _ = st.columns(3)
+with col7:
+    st.metric("AVG CONTRACTOR JOB RATING", f"{kpi6:.1f} / 5")
+    
 # === CHARTS & TABLES ===
 if not filtered_df.empty:
     if 'SECTOR' in filtered_df.columns:
