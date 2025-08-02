@@ -83,13 +83,10 @@ for col in ['APPROVAL MONTH', 'MONTH APPLICABLE']:
     if col in df.columns:
         df[col] = df[col].map(safe_strip)
 
-# === YEAR FILTER FIRST (needed by MONTH APPLICABLE) ===
-year = st.sidebar.multiselect("Filter by YEAR", get_unique_with_all('YEAR'), default=['All'], key="filter_year")
+# === YEAR OF MAIL RECEIPT FILTER (drives MONTH OF MAIL RECEIPT) ===
+year = st.sidebar.multiselect("Filter by YEAR OF MAIL RECEIPT", get_unique_with_all('YEAR'), default=['All'], key="filter_year")
 
-# === APPROVAL YEAR FILTER (needed by APPROVAL MONTH) ===
-approval_year = st.sidebar.multiselect("Filter by APPROVAL YEAR", get_unique_with_all('APPROVAL YEAR'), default=['All'], key="filter_approval_year")
-
-# === MONTH VALUES BASED ON YEAR ===
+# === MONTH OF MAIL RECEIPT VALUES BASED ON YEAR ===
 if 'MONTH APPLICABLE' in df.columns:
     if 'All' in year or not year:
         month_values = df['MONTH APPLICABLE'].dropna().unique().tolist()
@@ -98,6 +95,9 @@ if 'MONTH APPLICABLE' in df.columns:
 else:
     month_values = []
 
+# === APPROVAL YEAR FILTER (drives APPROVAL MONTH) ===
+approval_year = st.sidebar.multiselect("Filter by APPROVAL YEAR", get_unique_with_all('APPROVAL YEAR'), default=['All'], key="filter_approval_year")
+
 # === APPROVAL MONTH VALUES BASED ON APPROVAL YEAR ===
 if 'All' in approval_year or not approval_year:
     approval_month_values = df['APPROVAL MONTH'].dropna().unique().tolist()
@@ -105,9 +105,9 @@ else:
     approval_month_values = df[df['APPROVAL YEAR'].astype(str).str.strip().isin(approval_year)]['APPROVAL MONTH'].dropna().unique().tolist()
 
 # === SIDEBAR FILTERS ===
-month = st.sidebar.multiselect("Filter by MONTH APPLICABLE", ['All'] + sorted(month_values), default=['All'], key="filter_month_applicable")
+month = st.sidebar.multiselect("Filter by MONTH OF MAIL RECEIPT", ['All'] + sorted(month_values), default=['All'], key="filter_month_applicable")
 approval_month = st.sidebar.multiselect("Filter by APPROVAL MONTH", ['All'] + sorted(approval_month_values), default=['All'], key="filter_approval_month")
-status = st.sidebar.multiselect("Filter by STATUS", get_unique_with_all('STATUS'), default=['All'], key="filter_status")
+status = st.sidebar.multiselect("Filter by PAYMENT STATUS", get_unique_with_all('STATUS'), default=['All'], key="filter_status")
 lga = st.sidebar.multiselect("Filter by LGA", get_unique_with_all('LGA'), default=['All'], key="filter_lga")
 cofog = st.sidebar.multiselect("Filter by COFOG", get_unique_with_all('COFOG'), default=['All'], key="filter_cofog")
 theme = st.sidebar.multiselect("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'), default=['All'], key="filter_theme")
