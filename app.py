@@ -108,7 +108,7 @@ else:
     approval_month_values = df[df['APPROVAL YEAR'].astype(str).str.strip().isin(approval_year)]['APPROVAL MONTH'].dropna().unique().tolist()
 
 approval_month = st.sidebar.multiselect("Filter by APPROVAL MONTH", ['All'] + sorted(approval_month_values), default=['All'], key="filter_approval_month")
-status = st.sidebar.multiselect("Filter by PAYMENT STATUS", get_unique_with_all('STATUS'), default=['All'], key="filter_status")
+status = st.sidebar.multiselect("Filter by STATUS OF APPROVAL", get_unique_with_all('STATUS'), default=['All'], key="filter_status")
 lga = st.sidebar.multiselect("Filter by LGA", get_unique_with_all('LGA'), default=['All'], key="filter_lga")
 cofog = st.sidebar.multiselect("Filter by COFOG", get_unique_with_all('COFOG'), default=['All'], key="filter_cofog")
 theme = st.sidebar.multiselect("Filter by THEMES PILLAR", get_unique_with_all('THEMES PILLAR'), default=['All'], key="filter_theme")
