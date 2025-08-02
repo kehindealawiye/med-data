@@ -71,9 +71,6 @@ def get_unique_with_all(column):
     values = df[column].dropna().astype(str).str.strip().unique().tolist() if column in df.columns else []
     return ['All'] + sorted(values)
 
-# === YEAR FILTER FIRST (needed by other filters)
-year = st.sidebar.multiselect("Filter by Year", get_unique_with_all('YEAR'), default=['All'], key="filter_year")
-
 # === SAFE STRING CLEANING FUNCTION ===
 def safe_strip(val):
     try:
@@ -86,12 +83,13 @@ for col in ['APPROVAL MONTH', 'MONTH APPLICABLE']:
     if col in df.columns:
         df[col] = df[col].map(safe_strip)
 
-# === MONTH VALUES BASED ON YEAR ===
-if 'All' in year or not year:
-    approval_month_values = df['APPROVAL MONTH'].dropna().unique().tolist()
-else:
-    approval_month_values = df[df['YEAR'].astype(str).str.strip().isin(year)]['APPROVAL MONTH'].dropna().unique().tolist()
+# === YEAR FILTER FIRST (needed by MONTH APPLICABLE) ===
+year = st.sidebar.multiselect("Filter by YEAR", get_unique_with_all('YEAR'), default=['All'], key="filter_year")
 
+# === APPROVAL YEAR FILTER (needed by APPROVAL MONTH) ===
+approval_year = st.sidebar.multiselect("Filter by APPROVAL YEAR", get_unique_with_all('APPROVAL YEAR'), default=['All'], key="filter_approval_year")
+
+# === MONTH VALUES BASED ON YEAR ===
 if 'MONTH APPLICABLE' in df.columns:
     if 'All' in year or not year:
         month_values = df['MONTH APPLICABLE'].dropna().unique().tolist()
@@ -99,6 +97,12 @@ if 'MONTH APPLICABLE' in df.columns:
         month_values = df[df['YEAR'].astype(str).str.strip().isin(year)]['MONTH APPLICABLE'].dropna().unique().tolist()
 else:
     month_values = []
+
+# === APPROVAL MONTH VALUES BASED ON APPROVAL YEAR ===
+if 'All' in approval_year or not approval_year:
+    approval_month_values = df['APPROVAL MONTH'].dropna().unique().tolist()
+else:
+    approval_month_values = df[df['APPROVAL YEAR'].astype(str).str.strip().isin(approval_year)]['APPROVAL MONTH'].dropna().unique().tolist()
 
 # === SIDEBAR FILTERS ===
 month = st.sidebar.multiselect("Filter by MONTH APPLICABLE", ['All'] + sorted(month_values), default=['All'], key="filter_month_applicable")
@@ -118,10 +122,12 @@ if 'All' not in theme and theme:
 mda_options = filtered_for_mda['MDA'].dropna().astype(str).str.strip().unique().tolist()
 mda = st.sidebar.multiselect("Filter by MDA", ['All'] + sorted(mda_options), default=['All'], key="filter_mda")
 
-# === PAYMENT STAGE Filter Options Based on Other Filters ===
+# === PAYMENT STAGE Filter Options Based on All Filters ===
 filtered_for_stage = df.copy()
 if 'All' not in year and year:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['YEAR'].astype(str).str.strip().isin(year)]
+if 'All' not in approval_year and approval_year:
+    filtered_for_stage = filtered_for_stage[filtered_for_stage['APPROVAL YEAR'].astype(str).str.strip().isin(approval_year)]
 if 'All' not in month and month:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['MONTH APPLICABLE'].astype(str).str.strip().isin(month)]
 if 'All' not in approval_month and approval_month:
@@ -130,16 +136,21 @@ if 'All' not in lga and lga:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['LGA'].astype(str).str.strip().isin(lga)]
 if 'All' not in mda and mda:
     filtered_for_stage = filtered_for_stage[filtered_for_stage['MDA'].astype(str).str.strip().isin(mda)]
+    
 
 payment_options = filtered_for_stage['PAYMENT STAGE'].dropna().astype(str).str.strip().unique().tolist()
 payment_stage = st.sidebar.multiselect("Filter by Payment Stage", ['All'] + sorted(payment_options), default=['All'])
 
-
 # === FINAL FILTERS (filtered_df) ===
 filtered_df = df.copy()
 
+# Filter by YEAR → affects MONTH APPLICABLE
 if 'All' not in year and year:
     filtered_df = filtered_df[filtered_df['YEAR'].astype(str).str.strip().isin(year)]
+
+# Filter by APPROVAL YEAR → affects APPROVAL MONTH
+if 'All' not in approval_year and approval_year:
+    filtered_df = filtered_df[filtered_df['APPROVAL YEAR'].astype(str).str.strip().isin(approval_year)]
 
 if 'All' not in month and month:
     filtered_df = filtered_df[filtered_df['MONTH APPLICABLE'].astype(str).str.strip().isin(month)]
@@ -167,6 +178,7 @@ if 'PAYMENT STAGE' in filtered_df.columns and payment_stage and 'All' not in pay
     payment_stage_clean = [s.strip() for s in payment_stage]
     filtered_df = filtered_df[filtered_df['PAYMENT STAGE'].astype(str).str.strip().isin(payment_stage_clean)]
     
+
 # === KPI UTILS ===
 def safe_sum(df, col_key):
     col = column_map.get(col_key)
