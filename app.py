@@ -95,6 +95,9 @@ if 'MONTH APPLICABLE' in df.columns:
 else:
     month_values = []
 
+# === SIDEBAR FILTERS ===
+month = st.sidebar.multiselect("Filter by MONTH OF MAIL RECEIPT", ['All'] + sorted(month_values), default=['All'], key="filter_month_applicable")
+
 # === APPROVAL YEAR FILTER (drives APPROVAL MONTH) ===
 approval_year = st.sidebar.multiselect("Filter by APPROVAL YEAR", get_unique_with_all('APPROVAL YEAR'), default=['All'], key="filter_approval_year")
 
@@ -104,8 +107,6 @@ if 'All' in approval_year or not approval_year:
 else:
     approval_month_values = df[df['APPROVAL YEAR'].astype(str).str.strip().isin(approval_year)]['APPROVAL MONTH'].dropna().unique().tolist()
 
-# === SIDEBAR FILTERS ===
-month = st.sidebar.multiselect("Filter by MONTH OF MAIL RECEIPT", ['All'] + sorted(month_values), default=['All'], key="filter_month_applicable")
 approval_month = st.sidebar.multiselect("Filter by APPROVAL MONTH", ['All'] + sorted(approval_month_values), default=['All'], key="filter_approval_month")
 status = st.sidebar.multiselect("Filter by PAYMENT STATUS", get_unique_with_all('STATUS'), default=['All'], key="filter_status")
 lga = st.sidebar.multiselect("Filter by LGA", get_unique_with_all('LGA'), default=['All'], key="filter_lga")
